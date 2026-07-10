@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orioles First-Half Challenge</title>
+<style>
+  :root{
+    --orange:#f47a38;
+    --orange-dark:#c94f12;
+    --black:#171717;
+    --cream:#fffaf4;
+    --white:#ffffff;
+    --gray:#6b6b6b;
+    --light:#f2f2f2;
+    --green:#217a43;
+    --red:#b42318;
+    --shadow:0 12px 30px rgba(0,0,0,.14);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    color:var(--black);
+    background:
+      linear-gradient(rgba(20,20,20,.76),rgba(20,20,20,.76)),
+      repeating-linear-gradient(0deg,#7f2f19 0,#7f2f19 18px,#6e2614 18px,#6e2614 36px);
+    min-height:100vh;
+    padding:24px 12px;
+  }
+  button{font:inherit}
+  .quiz-shell{
+    width:min(760px,100%);
+    margin:0 auto;
+    background:var(--cream);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    border:1px solid rgba(255,255,255,.35);
+  }
+  .masthead{
+    background:linear-gradient(135deg,var(--orange),var(--orange-dark));
+    color:#fff;
+    padding:24px;
+    text-align:center;
+    position:relative;
+  }
+  .masthead::after{
+    content:"";
+    display:block;
+    width:70px;
+    height:4px;
+    background:#111;
+    margin:13px auto 0;
+    border-radius:99px;
+  }
+  .eyebrow{
+    margin:0 0 8px;
+    font-size:.78rem;
+    font-weight:800;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+  }
+  h1{font-size:clamp(1.8rem,5vw,2.8rem);line-height:1.05;margin:0}
+  .deck{max-width:570px;margin:13px auto 0;line-height:1.5}
+  .content{padding:clamp(22px,5vw,38px)}
+  .screen[hidden]{display:none}
+  .intro-card{text-align:center}
+  .baseball{
+    width:74px;height:74px;border-radius:50%;
+    margin:0 auto 18px;background:#fff;border:2px solid #ddd;
+    display:grid;place-items:center;font-size:2.2rem;
+  }
+  .intro-card h2,.result-card h2{font-size:1.65rem;margin:0 0 10px}
+  .intro-card p{line-height:1.55;color:#404040}
+  .difficulty{
+    display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:20px 0;
+  }
+  .pill{
+    padding:7px 10px;border-radius:999px;background:#fff;border:1px solid #ddd;
+    font-size:.86rem;font-weight:700;
+  }
+  .primary,.secondary{
+    border:0;border-radius:10px;padding:13px 20px;font-weight:800;cursor:pointer;
+  }
+  .primary{background:var(--black);color:#fff}
+  .primary:hover,.primary:focus{background:#333}
+  .secondary{background:#fff;border:2px solid var(--black);color:var(--black)}
+  .topline{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+  .question-count,.score{font-size:.9rem;font-weight:800;color:#4a4a4a}
+  .progress-track{height:9px;background:#ddd;border-radius:99px;overflow:hidden;margin-bottom:22px}
+  .progress-fill{height:100%;width:0;background:var(--orange);transition:width .25s ease}
+  .question{font-size:clamp(1.28rem,3.5vw,1.65rem);line-height:1.32;margin:0 0 18px}
+  .answers{display:grid;gap:11px}
+  .answer{
+    width:100%;text-align:left;background:#fff;border:2px solid #ddd;border-radius:11px;
+    padding:14px 15px;cursor:pointer;font-weight:700;line-height:1.3;
+  }
+  .answer:hover,.answer:focus{border-color:var(--orange);background:#fff6ef}
+  .answer:disabled{cursor:default}
+  .answer.correct{border-color:var(--green);background:#eaf6ee;color:#145b30}
+  .answer.incorrect{border-color:var(--red);background:#fff0ee;color:#8e1f17}
+  .feedback{
+    margin-top:18px;border-left:5px solid var(--orange);background:#fff;
+    padding:15px;border-radius:8px;line-height:1.48;
+  }
+  .feedback strong{display:block;font-size:1.08rem;margin-bottom:5px}
+  .next-row{display:flex;justify-content:flex-end;margin-top:17px}
+  .lineup{
+    display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-top:24px;
+  }
+  .inning{
+    aspect-ratio:1;border-radius:50%;display:grid;place-items:center;
+    background:#ddd;font-size:.8rem;font-weight:900;
+  }
+  .inning.good{background:var(--green);color:#fff}
+  .inning.bad{background:var(--red);color:#fff}
+  .result-card{text-align:center}
+  .result-icon{font-size:3rem;margin-bottom:8px}
+  .big-score{font-size:3rem;font-weight:900;color:var(--orange-dark);margin:8px 0}
+  .result-copy{line-height:1.55;color:#3f3f3f;max-width:520px;margin:0 auto 20px}
+  .benchmark{background:#fff;border:1px solid #ddd;border-radius:10px;padding:13px;margin:18px auto;max-width:470px}
+  .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .credit{text-align:center;color:#777;font-size:.75rem;margin-top:24px}
+  @media(max-width:520px){
+    body{padding:0}
+    .quiz-shell{border-radius:0;min-height:100vh}
+    .masthead{padding:21px 16px}
+    .content{padding:22px 16px}
+  }
+</style>
+</head>
+<body>
+<main class="quiz-shell" id="orioles-quiz">
+  <header class="masthead">
+    <p class="eyebrow">The Baltimore Sun Sports</p>
+    <h1>Orioles First-Half Challenge</h1>
+    <p class="deck">How closely did you follow the 2026 Orioles before the All-Star break?</p>
+  </header>
+
+  <section class="content">
+    <div class="screen intro-card" id="start-screen">
+      <div class="baseball" aria-hidden="true">⚾</div>
+      <h2>Think you paid attention?</h2>
+      <p>Answer 10 questions about the season’s biggest additions, performances and moments. Most are manageable. A few are built for die-hard Birdland fans.</p>
+      <div class="difficulty">
+        <span class="pill">3 easy</span>
+        <span class="pill">4 medium</span>
+        <span class="pill">3 hard</span>
+      </div>
+      <button class="primary" id="start-button">Start quiz</button>
+    </div>
+
+    <div class="screen" id="quiz-screen" hidden>
+      <div class="topline">
+        <span class="question-count" id="question-count"></span>
+        <span class="score" id="score-display"></span>
+      </div>
+      <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progress-fill"></div></div>
+      <h2 class="question" id="question-text"></h2>
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback" hidden></div>
+      <div class="next-row"><button class="primary" id="next-button" hidden>Next question</button></div>
+      <div class="lineup" id="lineup" aria-label="Question results"></div>
+    </div>
+
+    <div class="screen result-card" id="result-screen" hidden>
+      <div class="result-icon" id="result-icon"></div>
+      <h2 id="result-title"></h2>
+      <div class="big-score" id="final-score"></div>
+      <p class="result-copy" id="result-copy"></p>
+      <div class="benchmark"><strong>Beat the sports staff</strong><br><span id="benchmark-copy">Staff average coming after newsroom testing.</span></div>
+      <div class="actions">
+        <button class="primary" id="copy-button">Copy my score</button>
+        <button class="secondary" id="restart-button">Play again</button>
+      </div>
+    </div>
+
+    <p class="credit">Question 10 is a placeholder until the final pre-break game. Questions and explanations can be edited in the JavaScript section of this file.</p>
+  </section>
+</main>
+
+<script>
+/*
+  EDITOR NOTES
+  1. Each question lives in the QUESTIONS array below.
+  2. correct: 0 means the first answer is correct, 1 means the second, etc.
+  3. Answer choices are shuffled automatically during play.
+  4. Replace the benchmark text after Sun staff members take the quiz.
+  5. Recheck all wording and facts after the final pre-break game.
+*/
+
+const QUESTIONS = [
+  {
+    difficulty:"Easy",
+    question:"Who was the Orioles’ Opening Day starting pitcher in 2026?",
+    answers:["Kyle Bradish","Trevor Rogers","Shane Baz","Dean Kremer"],
+    correct:1,
+    explanation:"Trevor Rogers received the Opening Day assignment and threw seven scoreless innings against Minnesota."
+  },
+  {
+    difficulty:"Easy",
+    question:"Which slugging first baseman joined the Orioles before the 2026 season?",
+    answers:["Pete Alonso","Vladimir Guerrero Jr.","Rhys Hoskins","Josh Naylor"],
+    correct:0,
+    explanation:"Pete Alonso signed with Baltimore during the offseason and became a central figure in the Orioles’ lineup."
+  },
+  {
+    difficulty:"Easy",
+    question:"Which player did the Orioles trade to the Angels to acquire Taylor Ward?",
+    answers:["Heston Kjerstad","Grayson Rodriguez","Jackson Holliday","Cade Povich"],
+    correct:1,
+    explanation:"Baltimore acquired Taylor Ward from the Angels in exchange for right-hander Grayson Rodriguez."
+  },
+  {
+    difficulty:"Medium",
+    question:"Who delivered the walk-off hit to complete the Orioles’ five-run ninth-inning rally against Toronto?",
+    answers:["Adley Rutschman","Pete Alonso","Taylor Ward","Gunnar Henderson"],
+    correct:1,
+    explanation:"Pete Alonso capped the comeback with a walk-off RBI single in Baltimore’s 6-5 victory."
+  },
+  {
+    difficulty:"Medium",
+    question:"Which Oriole hit walk-off home runs on consecutive days in May?",
+    answers:["Colton Cowser","Gunnar Henderson","Samuel Basallo","Coby Mayo"],
+    correct:0,
+    explanation:"Colton Cowser became the second player in Orioles history since 1954 to hit a walk-off homer on consecutive days."
+  },
+  {
+    difficulty:"Medium",
+    question:"Which young catcher developed a particularly strong first-half partnership with Trevor Rogers?",
+    answers:["Adley Rutschman","Samuel Basallo","Alex Jackson","Maverick Handley"],
+    correct:1,
+    explanation:"Samuel Basallo caught Rogers more often than any other Orioles starter and drew praise for his work behind the plate."
+  },
+  {
+    difficulty:"Medium",
+    question:"Which Orioles pitcher signed the richest contract ever given to a pitcher in franchise history?",
+    answers:["Shane Baz","Trevor Rogers","Kyle Bradish","Ryan Helsley"],
+    correct:0,
+    explanation:"Shane Baz signed the largest pitching contract in Orioles history shortly before Opening Day."
+  },
+  {
+    difficulty:"Hard",
+    question:"The Orioles acquired Blaze Alexander from Arizona before the season. Which relief pitcher did Baltimore trade to the Diamondbacks?",
+    answers:["Bryan Baker","Kade Strowd","Yennier Cano","Nick Vespi"],
+    correct:1,
+    explanation:"Kade Strowd was the major league reliever included in the package Baltimore sent to Arizona."
+  },
+  {
+    difficulty:"Hard",
+    question:"Which Orioles pitcher earned the team’s first save of the 2026 season?",
+    answers:["Ryan Helsley","Yennier Cano","Félix Bautista","Keegan Akin"],
+    correct:0,
+    explanation:"Ryan Helsley recorded Baltimore’s first save of the season."
+  },
+  {
+    difficulty:"Hard",
+    question:"How many different pitchers started a game for the Orioles before the 2026 All-Star break?",
+    answers:["9","11","13","15"],
+    correct:1,
+    explanation:"This is the quiz’s final-boss question. Update the answer and explanation after the final game before the All-Star break."
+  }
+];
+
+const $ = (id) => document.getElementById(id);
+const startScreen = $("start-screen");
+const quizScreen = $("quiz-screen");
+const resultScreen = $("result-screen");
+const answersEl = $("answers");
+const feedbackEl = $("feedback");
+const nextButton = $("next-button");
+const lineupEl = $("lineup");
+
+let order = [];
+let index = 0;
+let score = 0;
+let results = [];
+let locked = false;
+
+function shuffle(array){
+  const copy = [...array];
+  for(let i=copy.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [copy[i],copy[j]]=[copy[j],copy[i]];
+  }
+  return copy;
+}
+
+function beginQuiz(){
+  order = shuffle(QUESTIONS);
+  index = 0;
+  score = 0;
+  results = [];
+  startScreen.hidden = true;
+  resultScreen.hidden = true;
+  quizScreen.hidden = false;
+  renderLineup();
+  showQuestion();
+}
+
+function showQuestion(){
+  locked = false;
+  feedbackEl.hidden = true;
+  nextButton.hidden = true;
+  answersEl.innerHTML = "";
+
+  const item = order[index];
+  $("question-count").textContent = `Question ${index+1} of ${order.length} · ${item.difficulty}`;
+  $("score-display").textContent = `Score: ${score}`;
+  $("progress-fill").style.width = `${(index/order.length)*100}%`;
+  $("question-text").textContent = item.question;
+
+  const choices = item.answers.map((text, originalIndex)=>({
+    text,
+    isCorrect: originalIndex === item.correct
+  }));
+
+  shuffle(choices).forEach(choice=>{
+    const btn=document.createElement("button");
+    btn.className="answer";
+    btn.textContent=choice.text;
+    btn.addEventListener("click",()=>selectAnswer(btn,choice.isCorrect,choices));
+    answersEl.appendChild(btn);
+  });
+}
+
+function selectAnswer(selected,isCorrect){
+  if(locked) return;
+  locked = true;
+  const item = order[index];
+  const buttons=[...answersEl.querySelectorAll(".answer")];
+
+  buttons.forEach(btn=>{
+    btn.disabled=true;
+    if(btn.textContent === item.answers[item.correct]) btn.classList.add("correct");
+  });
+
+  if(isCorrect){
+    score++;
+    feedbackEl.innerHTML=`<strong>✓ Correct!</strong>${item.explanation}`;
+  }else{
+    selected.classList.add("incorrect");
+    feedbackEl.innerHTML=`<strong>✕ Not quite. The answer is ${item.answers[item.correct]}.</strong>${item.explanation}`;
+  }
+
+  results.push(isCorrect);
+  $("score-display").textContent=`Score: ${score}`;
+  feedbackEl.hidden=false;
+  nextButton.textContent=index===order.length-1 ? "See my results" : "Next question";
+  nextButton.hidden=false;
+  renderLineup();
+}
+
+function next(){
+  index++;
+  if(index>=order.length) finish();
+  else showQuestion();
+}
+
+function renderLineup(){
+  lineupEl.innerHTML="";
+  for(let i=0;i<QUESTIONS.length;i++){
+    const dot=document.createElement("span");
+    dot.className="inning";
+    if(i<results.length){
+      dot.classList.add(results[i] ? "good" : "bad");
+      dot.textContent=results[i] ? "✓" : "✕";
+    }else{
+      dot.textContent=i+1;
+    }
+    lineupEl.appendChild(dot);
+  }
+}
+
+function finish(){
+  quizScreen.hidden=true;
+  resultScreen.hidden=false;
+  let title,icon,copy;
+  if(score===10){
+    [title,icon,copy]=["Birdland Historian","🏆","You didn’t miss a thing. That is a perfect first-half performance."];
+  }else if(score>=8){
+    [title,icon,copy]=["Camden Yards Regular","🔥","You clearly watched a lot of Orioles baseball. Only the toughest details got past you."];
+  }else if(score>=6){
+    [title,icon,copy]=["Everyday Fan","⚾","A solid showing. You knew the big moments, even if a few games slipped through the cracks."];
+  }else if(score>=4){
+    [title,icon,copy]=["Box Score Checker","🧢","You caught the main storylines, but the All-Star break offers a chance to brush up."];
+  }else{
+    [title,icon,copy]=["Spring Training Mode","😅","A rough first half — but there’s plenty of season left for a comeback."];
+  }
+  $("result-icon").textContent=icon;
+  $("result-title").textContent=title;
+  $("final-score").textContent=`${score}/10`;
+  $("result-copy").textContent=copy;
+}
+
+async function copyScore(){
+  const text=`I scored ${score}/10 on The Baltimore Sun’s Orioles First-Half Challenge.`;
+  try{
+    await navigator.clipboard.writeText(text);
+    $("copy-button").textContent="Score copied!";
+  }catch{
+    window.prompt("Copy your score:",text);
+  }
+}
+
+$("start-button").addEventListener("click",beginQuiz);
+nextButton.addEventListener("click",next);
+$("restart-button").addEventListener("click",beginQuiz);
+$("copy-button").addEventListener("click",copyScore);
+</script>
+</body>
+</html>
